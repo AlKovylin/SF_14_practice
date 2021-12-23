@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SF_14_practice
 {
     class Program
     {
-        private const int RangePage = 20;
+        /// <summary>
+        /// Количество строк на странице.
+        /// </summary>
+        private const int RangePage = 17;
+
+        private static PhoneBook phoneBook = new PhoneBook();
+        private static Table table = new Table(RangePage);
 
         static void Main(string[] args)
-        {
-            PhoneBook phoneBook = new PhoneBook();
-            Table table = new Table(RangePage);
-
+        {            
             if (!phoneBook.IsFile())
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -28,51 +32,95 @@ namespace SF_14_practice
 
             while (true)
             {
-                var KeyCode = Console.ReadKey().Key;
+                var Key = Console.ReadKey();
+
+                var KeyCode = Key.Key;
 
                 if (KeyCode == ConsoleKey.End)
                     break;
 
-                Console.Clear();
+                if (char.IsLetter(Key.KeyChar))
+                    LetterSelection(Key.KeyChar, PhoneBook);
+                
 
-                switch (KeyCode)
+                /*if(Regex.IsMatch(Key.KeyChar.ToString(), @"[А-Я]+$"))
+                    LetterSelection(Key.KeyChar, PhoneBook);*/
+
+
+                //Console.Clear();
+
+                /*switch (KeyCode)
                 {
                     //стрелка влево
                     case ConsoleKey.LeftArrow:
-                        pageCounter = GetPageCounter(PhoneBook, --pageCounter);
+                        pageCounter = GetPageCounter(PhoneBook.Count(), --pageCounter);
                         table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
                         break;
                     //стрелка вправо
                     case ConsoleKey.RightArrow:
-                        pageCounter = GetPageCounter(PhoneBook, ++pageCounter);
+                        pageCounter = GetPageCounter(PhoneBook.Count(), ++pageCounter);
                         table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
                         break;                        
                     default:
                         table.Err();
                         break;                        
-                }
+                }*/
             }
-        }   
-                
-        static int GetPageCounter(IEnumerable<Contact> contacts, int pageCounter)
+        }
+
+        /// <summary>
+        /// Производит выборку записей по первой букве фамилии.
+        /// </summary>
+        /// <param name="keyChar"></param>
+        private static void LetterSelection(char keyChar, IEnumerable<Contact> contacts)
+        {
+            List<Contact> selectLet = new List<Contact>();
+
+            foreach(var contact in contacts)
+            {
+                if (contact.LastName.StartsWith(keyChar))
+                    selectLet.Add(contact);
+            }
+
+            if (selectLet.Count > 0)
+                table.Show(selectLet, 1);
+            else
+                Console.WriteLine("Список не содержит записей на указанную букву.");
+        }
+
+        /// <summary>
+        /// Ограничивает количество отображаемых страниц в соотвествии с размером списка контактов
+        /// и заданным количеством строк на одной странице.
+        /// </summary>
+        /// <param name="contactsCount"></param>
+        /// <param name="pageCounter"></param>
+        /// <returns>Номер страницы.</returns>
+        static int GetPageCounter(int contactsCount, int pageCounter)
         {
             if (pageCounter < 1)
                 return 1;
 
-            double CalcPageCount = contacts.Count() / pageCounter;
-
-            if (pageCounter > 0 && pageCounter < Math.Ceiling(CalcPageCount))
+            if (pageCounter > 0 && pageCounter * RangePage < contactsCount + RangePage)
                 return pageCounter;
             else
-                return (int)Math.Ceiling(CalcPageCount);
+                return pageCounter - 1;
         }
 
+        /// <summary>
+        /// Выполняет выборку данных из списка контактов в соответствии с номером страницы.
+        /// </summary>
+        /// <param name="contacts"></param>
+        /// <param name="pageCounter"></param>
+        /// <returns>Список контактов для данной страницы.</returns>
         static IEnumerable<Contact> GetPage(IEnumerable<Contact> contacts, int pageCounter)
         {
             if (pageCounter == 1)
                 return contacts.Take(RangePage);
+
+            if (contacts.Count() - RangePage * (pageCounter -1) < RangePage)//если RangePage не кратна размеру списка контактов
+                return contacts.Skip(RangePage * (pageCounter -1));
             else
-                return contacts.Skip(RangePage * (pageCounter - 1)).Take(RangePage);
+                return contacts.Skip(RangePage * (pageCounter - 1)).Take(RangePage);                                   
         }
     }
 }
