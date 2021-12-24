@@ -5,7 +5,7 @@ namespace SF_14_practice
 {
     public class Table
     {
-        private int RangePage { get; set; }
+        private int RangePage { get; }
 
         public Table(int RangePage)
         {
@@ -18,12 +18,37 @@ namespace SF_14_practice
         /// <param name="page"></param>
         private void Header(int page)
         {
-            Console.WriteLine("\t\t\tТЕЛЕФОННЫЙ СПРАВОЧНИК\n");
-            Console.WriteLine("{0, 62} {1, 2}{2}", "Страница", page, ".");
-            Console.WriteLine("{0, 62} {1, 2}{2}", "Страница", page, ".");
-            Console.WriteLine("------------------------------------------------------------------");
-            Console.WriteLine("|  № |                  ФИО                   |      Телефон     |");
-            Console.WriteLine("------------------------------------------------------------------");
+            SetColor.Text();
+            Console.WriteLine("\t\t\tТЕЛЕФОННЫЙ СПРАВОЧНИК");
+            Console.WriteLine("{0, 66} {1, 2}{2}", "Страница", page, ".");
+
+            SetColor.Border();
+            Console.WriteLine("----------------------------------------------------------------------");
+            Console.Write("|  ");
+
+            SetColor.Text();
+            Console.Write("№");
+
+            SetColor.Border();
+            Console.Write("  |                   ");
+
+            SetColor.Text();
+            Console.Write("ФИО");
+
+            SetColor.Border();
+            Console.Write("                     |      ");
+
+            SetColor.Text();
+            Console.Write("Телефон");
+
+            SetColor.Border();
+            Console.WriteLine("     |");
+
+            //Console.WriteLine("|  №  |                   ФИО                     |      Телефон     |");
+
+            Console.WriteLine("----------------------------------------------------------------------");
+
+            Console.ResetColor();
         }
 
         /// <summary>
@@ -37,7 +62,30 @@ namespace SF_14_practice
 
             foreach (var contact in contacts)
             {
-                Console.WriteLine("| {0, 2} | {1, -12} {2, -12} {3, -12} | {4, -16} |", numFirstStr, contact.LastName, contact.FirstName, contact.Patronymic, contact.Phone.ToString("+#(###)###-##-##"));
+                SetColor.Border();
+                Console.Write("| ");
+
+                SetColor.Text();
+                Console.Write("{0, 3}", numFirstStr);
+
+                SetColor.Border();
+                Console.Write(" | ");
+
+                SetColor.Text();
+                Console.Write("{0, -12} {1, -12} {2, -15}", contact.LastName, contact.FirstName, contact.Patronymic);
+
+                SetColor.Border();
+                Console.Write(" | ");
+
+                SetColor.Text();
+                Console.Write("{0, -16}", contact.Phone.ToString("+#(###)###-##-##"));
+
+                SetColor.Border();
+                Console.WriteLine(" |");
+
+                Console.ResetColor();
+
+                //Console.WriteLine("| {0, 2} | {1, -12} {2, -12} {3, -12} | {4, -16} |", numFirstStr, contact.LastName, contact.FirstName, contact.Patronymic, contact.Phone.ToString("+#(###)###-##-##"));
                 numFirstStr++;
             }
         }
@@ -47,7 +95,9 @@ namespace SF_14_practice
         /// </summary>
         private void End()
         {
-            Console.WriteLine("------------------------------------------------------------------");           
+            SetColor.Border();
+            Console.WriteLine("----------------------------------------------------------------------");
+            Console.ResetColor();
         }
 
         /// <summary>
@@ -55,12 +105,14 @@ namespace SF_14_practice
         /// </summary>
         private void ControlInfo()
         {
-            WriteLine("\t{=Green}ИНСТРУКЦИЯ");
-            WriteLine("1. Перелистывание стрелками: {=Blue}вправо{=Green}, {=Blue}влево{=Green}.");
-            WriteLine("2. Сортировка по фамилиям стрелками: {=Red}А-Я {=Green}- {=Blue}вверх{=Green}, {=Red}Я-А {=Green}- {=Blue}вниз{=Green}.");
-            Console.WriteLine("3. Сортировка по именам: А-Я - page up, Я-А - page down.");
-            Console.WriteLine("4. Введите букву для получения списка отфильтрованного по фамилии.");
-            Console.WriteLine("5. Для завершения программы нажмите клавишу \"END\".");
+            WriteLine("\n\n\t{=Color1}ИНСТРУКЦИЯ\n");
+            WriteLine("1. Перелистывание стрелками: {=Color2}вправо{=Color1}, {=Color2}влево{=Color1}.");
+            WriteLine("2. Сортировка по фамилиям стрелками: {=Color3}А-Я {=Color1}- {=Color2}вверх{=Color1}, {=Color3}Я-А {=Color1}- {=Color2}вниз{=Color1}.");
+            WriteLine("3. Сортировка по именам: {=Color3}А-Я {=Color1}- {=Color2}page up{=Color1}, {=Color3}Я-А {=Color1}- {=Color2}page down{=Color1}.");
+            WriteLine("{=Color1}4. Введите букву для получения списка отфильтрованного по фамилии.");
+            WriteLine("{=Color1}5. Для завершения программы нажмите клавишу \"{=Color2}END{=Color1}\".");
+
+            Console.ResetColor();
         }
 
         /// <summary>
@@ -74,11 +126,14 @@ namespace SF_14_practice
         }
 
         /// <summary>
-        /// Выводит на экран сообщение об ошибочной команде.
+        /// Выводит на экран информационное сообщение.
         /// </summary>
-        public void Err()
+        public void Info(string message, int position, ConsoleColor color)
         {
-            Console.WriteLine("Команда не зарегистрирована.");
+            Console.SetCursorPosition(0, position);
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ResetColor();
         }
 
         /// <summary>
@@ -100,15 +155,24 @@ namespace SF_14_practice
         /// <param name="msg"></param>
         private void WriteLine(string msg)
         {
-            //Black, Blue, Cyan, DarkBlue, DarkCyan, DarkGray, DarkGreen, DarkMagenta, 
-            //DarkRed, DarkYellow, Gray, Green, Magenta, Red, White, Yellow
             string[] ss = msg.Split('{', '}');
-            ConsoleColor c;
+
             foreach (var s in ss)
-                if (s.StartsWith("/"))
-                    Console.ResetColor();
-                else if (s.StartsWith("=") && Enum.TryParse(s.Substring(1), out c))
-                    Console.ForegroundColor = c;
+                if (s.StartsWith("="))
+                {
+                    switch(s)
+                    {
+                        case "=Color1":
+                            SetColor.Text1();
+                            break;
+                        case "=Color2":
+                            SetColor.Text2();
+                            break;
+                        case "=Color3":
+                            SetColor.Text3();
+                            break;
+                    }
+                }
                 else
                     Console.Write(s);
             Console.WriteLine();

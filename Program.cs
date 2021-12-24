@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace SF_14_practice
 {
@@ -24,7 +23,10 @@ namespace SF_14_practice
             }
 
             List<Contact> PhoneBook_ = phoneBook.GetPhoneBook();
-            var PhoneBook = PhoneBook_.OrderBy(pb => pb.LastName).ThenBy(pb => pb.FirstName);
+
+            var TempBook = PhoneBook_.OrderBy(pb => pb.LastName).ThenBy(pb => pb.FirstName);
+
+            var PhoneBook = TempBook;
 
             int pageCounter = 1;
 
@@ -34,37 +36,57 @@ namespace SF_14_practice
             {
                 var Key = Console.ReadKey();
 
+                Console.Clear();
+
                 var KeyCode = Key.Key;
 
-                if (KeyCode == ConsoleKey.End)
+                if (KeyCode == ConsoleKey.End)//завершение программы
                     break;
 
-                if (char.IsLetter(Key.KeyChar))
-                    LetterSelection(Key.KeyChar, PhoneBook);
-                
-
-                /*if(Regex.IsMatch(Key.KeyChar.ToString(), @"[А-Я]+$"))
-                    LetterSelection(Key.KeyChar, PhoneBook);*/
-
-
-                //Console.Clear();
-
-                /*switch (KeyCode)
+                if (char.IsLetter(Key.KeyChar))//если введена буква
                 {
-                    //стрелка влево
-                    case ConsoleKey.LeftArrow:
-                        pageCounter = GetPageCounter(PhoneBook.Count(), --pageCounter);
-                        table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
-                        break;
-                    //стрелка вправо
-                    case ConsoleKey.RightArrow:
-                        pageCounter = GetPageCounter(PhoneBook.Count(), ++pageCounter);
-                        table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
-                        break;                        
-                    default:
-                        table.Err();
-                        break;                        
-                }*/
+                    LetterSelection(Key.KeyChar, PhoneBook);
+                }
+                else
+                {
+                    switch (KeyCode)
+                    {
+                        //стрелка влево
+                        case ConsoleKey.LeftArrow:
+                            PhoneBook = TempBook;
+                            pageCounter = GetPageCounter(PhoneBook.Count(), --pageCounter);
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            break;          
+                        //стрелка вправо
+                        case ConsoleKey.RightArrow:
+                            PhoneBook = TempBook;
+                            pageCounter = GetPageCounter(PhoneBook.Count(), ++pageCounter);
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            break;
+                        //стрелка вверх
+                        case ConsoleKey.UpArrow:
+                            PhoneBook = PhoneBook.OrderBy(pb => pb.LastName);
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            break;
+                        //стрелка вниз
+                        case ConsoleKey.DownArrow:
+                            PhoneBook = PhoneBook.OrderByDescending(pb => pb.LastName);
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            break;
+                        case ConsoleKey.PageUp:
+                            PhoneBook = PhoneBook.OrderBy(pb => pb.FirstName);
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            break;
+                        case ConsoleKey.PageDown:
+                            PhoneBook = PhoneBook.OrderByDescending(pb => pb.FirstName);
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            break;
+                        default:
+                            table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
+                            table.Info("Команда не зарегистрирована. См. ИНСТРУКЦИЮ.", RangePage + 6, ConsoleColor.Red);
+                            break;
+                    }
+                }
             }
         }
 
@@ -76,6 +98,8 @@ namespace SF_14_practice
         {
             List<Contact> selectLet = new List<Contact>();
 
+            keyChar = Convert.ToChar(keyChar.ToString().ToUpper());
+
             foreach(var contact in contacts)
             {
                 if (contact.LastName.StartsWith(keyChar))
@@ -85,7 +109,10 @@ namespace SF_14_practice
             if (selectLet.Count > 0)
                 table.Show(selectLet, 1);
             else
-                Console.WriteLine("Список не содержит записей на указанную букву.");
+            {
+                table.Show(selectLet, 1);
+                table.Info($"Список не содержит записей на букву \"{keyChar}\".", 6, ConsoleColor.Magenta);
+            }
         }
 
         /// <summary>
