@@ -24,9 +24,7 @@ namespace SF_14_practice
 
             List<Contact> PhoneBook_ = phoneBook.GetPhoneBook();
 
-            var TempBook = PhoneBook_.OrderBy(pb => pb.LastName).ThenBy(pb => pb.FirstName);
-
-            var PhoneBook = TempBook;
+            var PhoneBook = PhoneBook_.OrderBy(pb => pb.LastName).ThenBy(pb => pb.FirstName);            
 
             int pageCounter = 1;
 
@@ -53,13 +51,11 @@ namespace SF_14_practice
                     {
                         //стрелка влево
                         case ConsoleKey.LeftArrow:
-                            PhoneBook = TempBook;
                             pageCounter = GetPageCounter(PhoneBook.Count(), --pageCounter);
                             table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
                             break;          
                         //стрелка вправо
                         case ConsoleKey.RightArrow:
-                            PhoneBook = TempBook;
                             pageCounter = GetPageCounter(PhoneBook.Count(), ++pageCounter);
                             table.Show(GetPage(PhoneBook, pageCounter), pageCounter);
                             break;
